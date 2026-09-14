@@ -922,6 +922,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5653412702186698135, guid: 5348d19ffd142404980f2791aa7d8e2e, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 6029963697943276840, guid: 5348d19ffd142404980f2791aa7d8e2e, type: 3}
       propertyPath: m_Weight
       value: 1
@@ -932,15 +936,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7006223615331057017, guid: 5348d19ffd142404980f2791aa7d8e2e, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.8191521
+      value: 0.7933534
       objectReference: {fileID: 0}
     - target: {fileID: 7006223615331057017, guid: 5348d19ffd142404980f2791aa7d8e2e, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.5735764
+      value: -0.60876137
       objectReference: {fileID: 0}
     - target: {fileID: 7006223615331057017, guid: 5348d19ffd142404980f2791aa7d8e2e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -70
+      value: -75
       objectReference: {fileID: 0}
     - target: {fileID: 7306585372405633904, guid: 5348d19ffd142404980f2791aa7d8e2e, type: 3}
       propertyPath: distance
