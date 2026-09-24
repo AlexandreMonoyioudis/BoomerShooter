@@ -406,7 +406,7 @@ MonoBehaviour:
   Count: 1000
   SpawnRadius: 10
   CubeSize: 2
-  prefab: {fileID: 2656661009614553956, guid: 2c578b8d16d519e4a8529ffc76343e28, type: 3}
+  prefab: {fileID: 1579985479079623310, guid: 95b800cc7ed6eb5418d730c4130de735, type: 3}
 --- !u!1 &428941403
 GameObject:
   m_ObjectHideFlags: 0

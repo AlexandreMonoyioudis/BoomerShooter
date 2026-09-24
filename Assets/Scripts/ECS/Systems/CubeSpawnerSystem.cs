@@ -28,8 +28,6 @@ namespace ECS
 
 
                 ecb.SetName(newEntity, new FixedString64Bytes("Enemy"));
-                RuntimeColliderCache.EnsureBoxCollider(newEntity, state.EntityManager);
-                var colliderBlob = RuntimeColliderCache.BoxColliderBlob;
 
                 float3 spawnPos = spawner.ValueRO.SpawnPos;
                 ecb.SetComponent(newEntity, new LocalTransform
@@ -38,12 +36,6 @@ namespace ECS
                     Rotation = quaternion.identity,
                     Scale = 1f
                 });
-
-                ecb.AddComponent(newEntity, new PhysicsCollider { Value = colliderBlob });
-
-                var mass = PhysicsMass.CreateDynamic(colliderBlob.Value.MassProperties, 1f); // mass = 1
-
-                ecb.AddComponent(newEntity, mass);
 
                 ecb.AddComponent(newEntity, new PhysicsVelocity
                 {
@@ -69,7 +61,7 @@ namespace ECS
 
                 ecb.AddComponent(newEntity, new EnemyTag());
 
-                spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + 1f;
+                spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + 10f;
                 ecb.Playback(state.EntityManager);
             }
 
