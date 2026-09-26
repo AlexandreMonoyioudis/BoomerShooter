@@ -18,7 +18,7 @@ namespace ECS
         private EntityQuery inputQuery;
         private float fov;
         private Vector3 velocity;
-        private enum MoveState {idle, fowards, left, right, backwards }
+        private enum MoveState { idle, fowards, left, right, backwards }
         private MoveState moveState;
 
         [SerializeField] private float sensitivity = 50f;
@@ -28,6 +28,11 @@ namespace ECS
         [SerializeField] private float pitch;
         [SerializeField] private float yaw;
         [SerializeField] private Camera mainCam;
+        [SerializeField] private Animator animator;
+        [SerializeField] private Transform hips;
+
+        // NEW: Speed at which the hips turn to face the movement direction
+        [SerializeField] private float hipTurnSpeed = 10f;
 
         void Start()
         {
@@ -37,7 +42,6 @@ namespace ECS
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
-
 
             fov = mainCam.fieldOfView;
             offset = startoffset;
@@ -118,6 +122,7 @@ namespace ECS
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
             yaw += lookVector.x * sensitivity * Time.deltaTime;
 
+            // This aligns the base transform to the camera's yaw
             transform.rotation = Quaternion.Euler(0f, yaw, 0f);
             Camera.main.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
 
@@ -127,16 +132,32 @@ namespace ECS
                 StartCoroutine(nameof(playerJumped));
                 m.jumped = false;
             }
+
             Vector2 move = moveAction.action.ReadValue<Vector2>();
             moveState = GetMoveState(move);
+
+            if (hips != null && move.sqrMagnitude > 0.01f)
+            {
+                Vector3 moveDirection = transform.right * move.x + transform.forward * move.y;
+
+                if (moveDirection != Vector3.zero)
+                {
+                    // Determine target rotation and smoothly interpolate toward it
+                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection.normalized, Vector3.up);
+                    hips.rotation = Quaternion.Slerp(hips.rotation, targetRotation, hipTurnSpeed * Time.deltaTime);
+                }
+            }
+            transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            Camera.main.transform.rotation = Quaternion.Euler(pitch, yaw , 0f);
+
             var input = new PlayerInputData
             {
-                MoveAction = moveAction.action.ReadValue<Vector2>(),
+                MoveAction = move,
                 Yaw = yaw,
                 JumpAction = jumpAction.action.ReadValue<float>() == 1,
             };
 
-            // 2. We already verified entity isn't Null at the top, so we can just set data safely
+            // We already verified entity isn't Null at the top, so we can just set data safely
             em.SetComponentData(entity, input);
             em.SetComponentData(entity, m);
 
@@ -164,7 +185,8 @@ namespace ECS
             }
         }
 
-        IEnumerator playerJumped() {
+        IEnumerator playerJumped()
+        {
             bool changeFov = true;
             if (moveState == MoveState.idle) changeFov = false;
 
@@ -176,14 +198,13 @@ namespace ECS
                 yield return null;
             }
             i = 0;
-            for (; i < 1; i+=Time.deltaTime)
+            for (; i < 1; i += Time.deltaTime)
             {
                 offset = new Vector3(offset.x, offset.y - (Time.deltaTime * .5f), offset.z);
-                if (changeFov) mainCam.fieldOfView -= Time.deltaTime*2f;
+                if (changeFov) mainCam.fieldOfView -= Time.deltaTime * 2f;
                 yield return null;
             }
             offset = startoffset;
         }
-
     }
 }

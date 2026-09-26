@@ -61,7 +61,7 @@ namespace ECS
 
                 ecb.AddComponent(newEntity, new EnemyTag());
 
-                spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + 10f;
+                spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + 2f;
                 ecb.Playback(state.EntityManager);
             }
 

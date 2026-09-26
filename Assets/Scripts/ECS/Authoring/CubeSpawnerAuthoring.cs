@@ -24,7 +24,8 @@ namespace ECS
                     SpawnRadius = authoring.SpawnRadius,
                     CubeSize = authoring.CubeSize,
                     Prefab = GetEntity(authoring.prefab, TransformUsageFlags.Dynamic),
-                    SpawnPos = authoring.transform.position
+                    SpawnPos = authoring.transform.position,
+                    NextSpawnTime = -20f
 
                 }
                 );
