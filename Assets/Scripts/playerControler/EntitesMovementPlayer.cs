@@ -116,7 +116,11 @@ namespace ECS
             Vector3 targetPos = (Vector3)ltw.Position +
             (Vector3)ltw.Right * offset.x + Vector3.up * Mathf.Max(offset.y, startoffset.y) +
             (Vector3)ltw.Forward * offset.z;
+            Debug.Log(targetPos);
             transform.position = targetPos;
+            Debug.Log(transform.position);
+
+
 
             pitch += -lookVector.y * sensitivity * Time.deltaTime;
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
@@ -147,8 +151,6 @@ namespace ECS
                     hips.rotation = Quaternion.Slerp(hips.rotation, targetRotation, hipTurnSpeed * Time.deltaTime);
                 }
             }
-            transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-            Camera.main.transform.rotation = Quaternion.Euler(pitch, yaw , 0f);
 
             var input = new PlayerInputData
             {
