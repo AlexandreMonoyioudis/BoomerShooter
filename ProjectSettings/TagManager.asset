@@ -43,4 +43,6 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
+  - NoCulling
+  - Decal
   m_MigratedRenderPipelines: []

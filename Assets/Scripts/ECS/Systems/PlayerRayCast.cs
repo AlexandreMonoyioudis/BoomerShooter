@@ -96,57 +96,59 @@ namespace ECS
                 }
             }
 
-            // PHASE 2: Execute Raycast Job
-            var hitResults = new NativeList<DecalHitInfo>(Allocator.TempJob);
+            var hitResults = new NativeQueue<DecalHitInfo>(Allocator.TempJob);
 
-            var job = new RaycastJob
+            try
             {
-                CollisionWorld = physicsWorld.CollisionWorld,
-                EnemyLookup = SystemAPI.GetComponentLookup<EnemyComponent>(isReadOnly: true),
-                HitResults = hitResults,
-                ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
-            };
-
-            state.Dependency = job.Schedule(state.Dependency);
-            state.Dependency.Complete();
-
-            // PHASE 3: Apply Pool Updates and Component Changes
-            DynamicBuffer<BulletMarkPoolElement> markPool = state.EntityManager.GetBuffer<BulletMarkPoolElement>(poolSingletonEntity);
-
-            if (markPool.Length > 0 && hitResults.Length > 0)
-            {
-                for (int i = 0; i < hitResults.Length; i++)
+                var job = new RaycastJob
                 {
-                    var hit = hitResults[i];
-                    var poolElement = markPool[0];
-                    markPool.RemoveAt(0);
+                    CollisionWorld = physicsWorld.CollisionWorld,
+                    EnemyLookup = SystemAPI.GetComponentLookup<EnemyComponent>(isReadOnly: true),
+                    HitResults = hitResults.AsParallelWriter(),
+                    ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
+                };
 
-                    // Reposition Decal at impact point
-                    if (poolElement.DecalEntity != Entity.Null && hit.HasDecal)
-                    {
-                        state.EntityManager.SetComponentData(poolElement.DecalEntity, hit.DecalTransform);
-                    }
+                state.Dependency = job.Schedule(state.Dependency);
+                state.Dependency.Complete();
 
-                    // Initialize Lerp Data on the pooled VFX entity
-                    if (poolElement.DecalEntityVFX != Entity.Null)
+                DynamicBuffer<BulletMarkPoolElement> markPool = state.EntityManager.GetBuffer<BulletMarkPoolElement>(poolSingletonEntity);
+
+                if (markPool.Length > 0)
+                {
+                    while (hitResults.TryDequeue(out DecalHitInfo hit))
                     {
-                        state.EntityManager.SetComponentData(poolElement.DecalEntityVFX, hit.VfxInitialTransform);
-                        state.EntityManager.SetComponentData(poolElement.DecalEntityVFX, new VfxLerpData
+                        var poolElement = markPool[0];
+                        markPool.RemoveAt(0);
+
+                        // Reposition Decal at impact point
+                        if (poolElement.DecalEntity != Entity.Null && hit.HasDecal)
                         {
-                            Start = hit.VfxStart,
-                            Target = hit.VfxTarget,
-                            Speed = hit.VfxSpeed,
-                            Progress = 0f,
-                            IsActive = true,
-                            InitializePosition = true
-                        });
-                    }
+                            state.EntityManager.SetComponentData(poolElement.DecalEntity, hit.DecalTransform);
+                        }
 
-                    markPool.Add(poolElement);
+                        // Initialize Lerp Data on the pooled VFX entity
+                        if (poolElement.DecalEntityVFX != Entity.Null)
+                        {
+                            state.EntityManager.SetComponentData(poolElement.DecalEntityVFX, hit.VfxInitialTransform);
+                            state.EntityManager.SetComponentData(poolElement.DecalEntityVFX, new VfxLerpData
+                            {
+                                Start = hit.VfxStart,
+                                Target = hit.VfxTarget,
+                                Speed = hit.VfxSpeed,
+                                Progress = 0f,
+                                IsActive = true,
+                                InitializePosition = true
+                            });
+                        }
+
+                        markPool.Add(poolElement);
+                    }
                 }
             }
-
-            hitResults.Dispose();
+            finally
+            {
+                hitResults.Dispose();
+            }
         }
 
         private void InitializePool(ref SystemState state, Entity poolSingletonEntity, Entity decalPrefab, Entity vfxPrefab)
@@ -222,7 +224,8 @@ namespace ECS
         {
             [ReadOnly] public CollisionWorld CollisionWorld;
             [ReadOnly] public ComponentLookup<EnemyComponent> EnemyLookup;
-            public NativeList<DecalHitInfo> HitResults;
+
+            public NativeQueue<DecalHitInfo>.ParallelWriter HitResults;
             public EntityCommandBuffer.ParallelWriter ECB;
 
             public void Execute([EntityIndexInQuery] int sortKey, Entity entity, DynamicBuffer<RayParam> rayBuffer)
@@ -291,14 +294,13 @@ namespace ECS
                         }
                     }
 
-                    HitResults.Add(hitInfo);
+                    HitResults.Enqueue(hitInfo);
                     rayBuffer.RemoveAt(i);
                 }
             }
         }
     }
 
-    // --- SYSTEM 2: EXECUTES FRAME-BY-FRAME LERP FOR VFX ---
 
     [BurstCompile]
     public partial struct VfxLerpSystem : ISystem

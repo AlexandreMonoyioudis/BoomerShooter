@@ -51,7 +51,6 @@ namespace ECS
 
                 ecb.AddComponent(newEntity, new PhysicsGravityFactor { Value = 1f });
 
-                ecb.AddSharedComponent(newEntity, new PhysicsWorldIndex { Value = 0 });
                 ecb.AddComponent(newEntity, new EnemyComponent
                 {
                     moveDirection = new Random(0xABCDEFu).NextFloat3(),

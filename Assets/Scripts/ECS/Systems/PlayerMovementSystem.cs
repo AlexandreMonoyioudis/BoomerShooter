@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections; // Added this for [ReadOnly]
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -8,8 +9,8 @@ using Unity.Transforms;
 
 namespace ECS
 {
-    [UpdateInGroup(typeof(PhysicsSystemGroup))]
-    [UpdateAfter(typeof(BuildPhysicsWorld))]
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [UpdateBefore(typeof(PhysicsSystemGroup))]
     public partial struct PlayerMovementSystem : ISystem
     {
         private EntityQuery _query;
@@ -37,14 +38,14 @@ namespace ECS
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            // Get the shared physics world (no clone needed)
             var collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
-
-            var cwCopy = collisionWorld.Clone();
 
             var job = new PlayerMoveJob
             {
                 DeltaTime = SystemAPI.Time.DeltaTime,
-                CollisionWorld = cwCopy,
+                // Pass the original world directly
+                CollisionWorld = collisionWorld,
             };
 
             state.Dependency = job.Schedule(_query, state.Dependency);
@@ -54,7 +55,9 @@ namespace ECS
         public partial struct PlayerMoveJob : IJobEntity
         {
             public float DeltaTime;
-            public CollisionWorld CollisionWorld;
+
+            // Mark as ReadOnly so the Job System knows it's safe to use the shared world
+            [ReadOnly] public CollisionWorld CollisionWorld;
 
             void Execute(Entity entity,
                          ref LocalTransform transform,
@@ -89,7 +92,7 @@ namespace ECS
                         Filter = new CollisionFilter
                         {
                             BelongsTo = playerLayerMask,
-                            CollidesWith = ~playerLayerMask 
+                            CollidesWith = ~playerLayerMask
                         }
                     };
 
@@ -102,8 +105,6 @@ namespace ECS
                     }
                     else m.jumpCooldown += DeltaTime;
                 }
-             
-
 
                 float2 raw = input.MoveAction;
 
@@ -122,7 +123,8 @@ namespace ECS
                     v.Linear = new float3(moveDir.x * m.speed,
                                           v.Linear.y,
                                           moveDir.z * m.speed);
-                else {
+                else
+                {
                     float linearDrag = 1.0f;
 
                     if (v.Linear.y > 0)

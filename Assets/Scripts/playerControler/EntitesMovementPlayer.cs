@@ -116,9 +116,7 @@ namespace ECS
             Vector3 targetPos = (Vector3)ltw.Position +
             (Vector3)ltw.Right * offset.x + Vector3.up * Mathf.Max(offset.y, startoffset.y) +
             (Vector3)ltw.Forward * offset.z;
-            Debug.Log(targetPos);
             transform.position = targetPos;
-            Debug.Log(transform.position);
 
 
 
