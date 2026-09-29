@@ -1,0 +1,243 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: playerAvatarMaskUpper
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: upperbody
+    m_Weight: 1
+  - m_Path: upperbody/beveled_cuboid_1
+    m_Weight: 0
+  - m_Path: upperbody/cylinder_1
+    m_Weight: 0
+  - m_Path: upperbody/head
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm/connector
+    m_Weight: 0
+  - m_Path: upperbody/hGunArm/hArm1
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm/hArm1/hArm2
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/elbow
+    m_Weight: 0
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/forarm
+    m_Weight: 0
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/hArm3
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/hArm3/cylinder_4
+    m_Weight: 0
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/hArm3/hgun
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/hArm3/hgun/cylinder_5
+    m_Weight: 0
+  - m_Path: upperbody/hGunArm/hArm1/hArm2/hArm3/hgun/gunBody
+    m_Weight: 1
+  - m_Path: upperbody/hGunArm/hArm1/lowerArm
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/cube_10
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/elbow_2
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/gun2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/gun2/mesh_3
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/gun2/slider
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/gun2/slider/cylinder_6
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/armourPlate_2
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/finger2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/finger2/cube_7
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/finger2/fingerMid2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/finger2/fingerMid2/cube_8
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/finger2/fingerMid2/fingerTip2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/finger2/fingerMid2/fingerTip2/cube_9
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/mesh
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/Thumb
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/Thumb/cube_1
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/Thumb/thumbMid
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/Thumb/thumbMid/cube_5
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/Thumb/thumbMid/thumbTip
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/leftHand/Thumb/thumbMid/thumbTip/cube_6
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/armourPlate_3
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/cube
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/finger
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/finger/cube_2
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/finger/fingerMid
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/finger/fingerMid/cube_3
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/finger/fingerMid/fingerTip
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/hand/rightHand/finger/fingerMid/fingerTip/cube_4
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/Sword
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/arm/Sword/beveled_cuboid
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/Arm2/upperArmRotation/plane
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/cube_11
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder/cylinder
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/cube_13
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/elbow_1
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/gun3
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/gun3/mesh_2
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/gun3/slider2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/gun3/slider2/cylinder_8
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/armourPlate
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/finger4
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/finger4/cube_21
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/finger4/fingerMid4
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/finger4/fingerMid4/cube_22
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/finger4/fingerMid4/fingerTip4
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/finger4/fingerMid4/fingerTip4/cube_23
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/mesh_1
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/Thumb2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/Thumb2/cube_18
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/Thumb2/thumbMid2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/Thumb2/thumbMid2/cube_19
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/Thumb2/thumbMid2/thumbTip2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/leftHand2/Thumb2/thumbMid2/thumbTip2/cube_20
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/armourPlate_1
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/cube_14
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/finger3
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/finger3/cube_15
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/finger3/fingerMid3
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/finger3/fingerMid3/cube_16
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/finger3/fingerMid3/fingerTip3
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/hand2/rightHand2/finger3/fingerMid3/fingerTip3/cube_17
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/Sword2
+    m_Weight: 1
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/arm4/Sword2/beveled_cuboid_2
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/Arm3/upperArmRotation2/plane_1
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/cube_12
+    m_Weight: 0
+  - m_Path: upperbody/Shoulder2/cylinder_7
+    m_Weight: 0
+  - m_Path: waist
+    m_Weight: 0
+  - m_Path: waist/legConnecter
+    m_Weight: 0
+  - m_Path: waist/thigh1
+    m_Weight: 0
+  - m_Path: waist/thigh1/cylinder_2
+    m_Weight: 0
+  - m_Path: waist/thigh1/midleg
+    m_Weight: 0
+  - m_Path: waist/thigh1/midleg/lowerLeg
+    m_Weight: 0
+  - m_Path: waist/thigh1/midleg/lowerLeg/lowerleg_1
+    m_Weight: 0
+  - m_Path: waist/thigh1/midleg/midleg_1
+    m_Weight: 0
+  - m_Path: waist/thigh1/sphere
+    m_Weight: 0
+  - m_Path: waist/thigh1/thigh
+    m_Weight: 0
+  - m_Path: waist/thigh2
+    m_Weight: 0
+  - m_Path: waist/thigh2/cylinder_3
+    m_Weight: 0
+  - m_Path: waist/thigh2/midleg2
+    m_Weight: 0
+  - m_Path: waist/thigh2/midleg2/lowerLeg3
+    m_Weight: 0
+  - m_Path: waist/thigh2/midleg2/lowerLeg3/lowerleg
+    m_Weight: 0
+  - m_Path: waist/thigh2/midleg2/midleg_2
+    m_Weight: 0
+  - m_Path: waist/thigh2/sphere_1
+    m_Weight: 0
+  - m_Path: waist/thigh2/thigh_1
+    m_Weight: 0
+  - m_Path: waist/waist_1
+    m_Weight: 0

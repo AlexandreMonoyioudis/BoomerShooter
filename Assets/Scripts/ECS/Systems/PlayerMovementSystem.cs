@@ -15,6 +15,7 @@ namespace ECS
     {
         private EntityQuery _query;
 
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             _query = state.GetEntityQuery(new EntityQueryDesc

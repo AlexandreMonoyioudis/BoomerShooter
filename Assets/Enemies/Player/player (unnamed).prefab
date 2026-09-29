@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7432092385295700219}
   - component: {fileID: 6596500265976016995}
   - component: {fileID: 7824389967505937907}
+  - component: {fileID: 2965769138830572268}
   m_Layer: 6
   m_Name: player (unnamed)
   m_TagString: Player
@@ -142,3 +143,21 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2965769138830572268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2656661009614553956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d8e32b37d8002c4980195ca2d604611, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ECS.PlayerAuthoring
+  player: {fileID: 2656661009614553956}
+  bulletMarkPrefab: {fileID: 5091476569424244728, guid: 52ae0b56cb8c0a149aae8e3b24a2aed5, type: 3}
+  bulletVFXPrefab: {fileID: 3216402924751700360, guid: f34da9b5dd88d4d4e8f45f3bef5084ae, type: 3}
+  speed: 20
+  jumpHeight: 10
+  gravityFactor: 3

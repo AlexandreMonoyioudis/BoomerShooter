@@ -63,8 +63,19 @@ namespace ECS
         {
             while (true)
             {
+                // CRITICAL FIX: The query now enforces that the Entity MUST have BOTH PlayerInputData and PlayerData.
+                // This stops it from grabbing an entity that is only partially baked.
                 em = World.DefaultGameObjectInjectionWorld.EntityManager;
-                inputQuery = em.CreateEntityQuery(ComponentType.ReadWrite<PlayerInputData>());
+                inputQuery = em.CreateEntityQuery(new EntityQueryDesc
+                {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadWrite<PlayerInputData>(),
+                        ComponentType.ReadWrite<PlayerData>(),
+                        ComponentType.ReadOnly<PhysicsVelocity>() // Ensuring physics has fully bound as well
+                    }
+                });
+
                 if (inputQuery.IsEmptyIgnoreFilter == false)
                 {
                     try
@@ -100,7 +111,7 @@ namespace ECS
                     }
                 }
 
-                Debug.LogWarning("Player not found yet...");
+                Debug.LogWarning("Player not found yet or baking incomplete...");
                 yield return null;
             }
         }
@@ -110,6 +121,14 @@ namespace ECS
             if (entity == Entity.Null)
                 return;
 
+            // Extra fallback check to prevent runtime frame drops if an entity gets destroyed or scrubbed
+            if (!em.Exists(entity))
+            {
+                entity = Entity.Null;
+                StartCoroutine(FindPlayer());
+                return;
+            }
+
             Vector2 lookVector = lookAction.action.ReadValue<Vector2>();
 
             var ltw = em.GetComponentData<LocalToWorld>(entity);
@@ -117,8 +136,6 @@ namespace ECS
             (Vector3)ltw.Right * offset.x + Vector3.up * Mathf.Max(offset.y, startoffset.y) +
             (Vector3)ltw.Forward * offset.z;
             transform.position = targetPos;
-
-
 
             pitch += -lookVector.y * sensitivity * Time.deltaTime;
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
@@ -150,19 +167,22 @@ namespace ECS
                 }
             }
 
+            // CRITICAL ARCHITECTURE CLEANUP: Passing Yaw directly down so your PlayerMovementSystem can rotate the physics object
             var input = new PlayerInputData
             {
                 MoveAction = move,
                 Yaw = yaw,
                 JumpAction = jumpAction.action.ReadValue<float>() == 1,
+                sensitivity = sensitivity,
+                minPitch = minPitch,
+                maxPitch = maxPitch
             };
 
-            // We already verified entity isn't Null at the top, so we can just set data safely
             em.SetComponentData(entity, input);
             em.SetComponentData(entity, m);
 
             velocity = em.GetComponentData<PhysicsVelocity>(entity).Linear;
-            float velContribution = new Vector2(velocity.x, velocity.y).sqrMagnitude / 16f;
+            float velContribution = new Vector2(velocity.x, velocity.z).sqrMagnitude / 16f; // Swapped velocity.y to velocity.z for standard horizontal FOV calculation
             float targetFov = fov + velContribution / 2;
             targetFov = Mathf.Clamp(targetFov, 75, 130);
             mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, targetFov, 10 * Time.deltaTime);
@@ -187,6 +207,7 @@ namespace ECS
 
         IEnumerator playerJumped()
         {
+            animator.SetTrigger("Jumped");
             bool changeFov = true;
             if (moveState == MoveState.idle) changeFov = false;
 
