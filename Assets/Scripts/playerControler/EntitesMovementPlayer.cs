@@ -10,31 +10,36 @@ namespace ECS
 {
     public class EntitesMovementPlayer : MonoBehaviour
     {
+        [Header("Input Actions")]
         [SerializeField] private InputActionReference moveAction, lookAction, jumpAction;
-        [SerializeField] private Vector3 startoffset;
+
+        [Header("Camera & Animation")]
+        [SerializeField] private Camera mainCam;
+        [SerializeField] private Animator animator;
+        [SerializeField] private Transform hips;
+        [SerializeField] private Vector3 startOffset;
+        [SerializeField] private float sensitivity = 50f;
+        [SerializeField] private float minPitch = -45f;
+        [SerializeField] private float maxPitch = 45f;
+        [SerializeField] private float hipTurnSpeed = 10f;
+
+        private Transform mainCamTransform;
         private Vector3 offset;
         private Entity entity = Entity.Null;
         private EntityManager em;
         private EntityQuery inputQuery;
+
         private float fov;
-        private Vector3 velocity;
-        private enum MoveState { idle, fowards, left, right, backwards }
+        private float pitch;
+        private float yaw;
         private MoveState moveState;
+        private enum MoveState { idle, forwards, left, right, backwards }
 
-        [SerializeField] private float sensitivity = 50f;
-        [SerializeField] private float minPitch = -45f;
-        [SerializeField] private float maxPitch = 45f;
+        // Cache animator hashes to avoid string allocations every frame
+        private readonly int groundedHash = Animator.StringToHash("isGrounded");
+        private readonly int jumpedHash = Animator.StringToHash("Jumped");
 
-        [SerializeField] private float pitch;
-        [SerializeField] private float yaw;
-        [SerializeField] private Camera mainCam;
-        [SerializeField] private Animator animator;
-        [SerializeField] private Transform hips;
-
-        // NEW: Speed at which the hips turn to face the movement direction
-        [SerializeField] private float hipTurnSpeed = 10f;
-
-        void Start()
+        private void Start()
         {
             moveAction?.action.Enable();
             jumpAction?.action.Enable();
@@ -43,11 +48,22 @@ namespace ECS
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
 
+            mainCamTransform = mainCam.transform;
             fov = mainCam.fieldOfView;
-            offset = startoffset;
-            yaw = transform.localEulerAngles.x;
-            pitch = transform.localEulerAngles.y;
+            offset = startOffset;
+
+            // Corrected: X is usually pitch, Y is yaw in Euler angles
+            pitch = transform.localEulerAngles.x;
+            yaw = transform.localEulerAngles.y;
             if (pitch > 180f) pitch -= 360f;
+
+            em = World.DefaultGameObjectInjectionWorld.EntityManager;
+
+            // 1. CACHE THE QUERY ONCE
+            inputQuery = new EntityQueryBuilder(Allocator.Temp)
+                .WithAllRW<PlayerInputData, PlayerData>()
+                .WithAll<PhysicsVelocity, LocalToWorld>()
+                .Build(em);
 
             StartCoroutine(FindPlayer());
         }
@@ -59,42 +75,13 @@ namespace ECS
             lookAction?.action.Disable();
         }
 
-        IEnumerator FindPlayer()
+        private IEnumerator FindPlayer()
         {
-            while (true)
+            while (entity == Entity.Null)
             {
-                // CRITICAL FIX: The query now enforces that the Entity MUST have BOTH PlayerInputData and PlayerData.
-                // This stops it from grabbing an entity that is only partially baked.
-                em = World.DefaultGameObjectInjectionWorld.EntityManager;
-                inputQuery = em.CreateEntityQuery(new EntityQueryDesc
+                if (!inputQuery.IsEmptyIgnoreFilter)
                 {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadWrite<PlayerInputData>(),
-                        ComponentType.ReadWrite<PlayerData>(),
-                        ComponentType.ReadOnly<PhysicsVelocity>() // Ensuring physics has fully bound as well
-                    }
-                });
-
-                if (inputQuery.IsEmptyIgnoreFilter == false)
-                {
-                    try
-                    {
-                        entity = inputQuery.GetSingletonEntity();
-                        em.SetComponentData(entity, new PlayerInputData
-                        {
-                            sensitivity = sensitivity,
-                            minPitch = minPitch,
-                            maxPitch = maxPitch
-                        });
-                        Debug.Log("Player FOUND (singleton): " + entity);
-                        yield break;
-                    }
-                    catch
-                    {
-                        // Not a singleton — fall back to ToEntityArray
-                    }
-
+                    // 2. REMOVED TRY-CATCH, use NativeArray safely
                     using var arr = inputQuery.ToEntityArray(Allocator.Temp);
                     if (arr.Length > 0)
                     {
@@ -104,24 +91,21 @@ namespace ECS
                         {
                             sensitivity = sensitivity,
                             minPitch = minPitch,
-                            maxPitch = maxPitch,
+                            maxPitch = maxPitch
                         });
-                        Debug.Log("Player FOUND (array): " + entity);
+
+                        Debug.Log("Player FOUND: " + entity);
                         yield break;
                     }
                 }
-
-                Debug.LogWarning("Player not found yet or baking incomplete...");
                 yield return null;
             }
         }
 
-        void Update()
+        private void Update()
         {
-            if (entity == Entity.Null)
-                return;
+            if (entity == Entity.Null) return;
 
-            // Extra fallback check to prevent runtime frame drops if an entity gets destroyed or scrubbed
             if (!em.Exists(entity))
             {
                 entity = Entity.Null;
@@ -129,103 +113,103 @@ namespace ECS
                 return;
             }
 
+            // Read Inputs
             Vector2 lookVector = lookAction.action.ReadValue<Vector2>();
+            Vector2 move = moveAction.action.ReadValue<Vector2>();
+            bool isJumping = jumpAction.action.ReadValue<float>() > 0.5f;
+            float moveSqrMag = move.sqrMagnitude;
 
+            // Fetch Data
             var ltw = em.GetComponentData<LocalToWorld>(entity);
+            var m = em.GetComponentData<PlayerData>(entity);
+            var velocity = em.GetComponentData<PhysicsVelocity>(entity).Linear;
+
+            // Camera Position Calculation
             Vector3 targetPos = (Vector3)ltw.Position +
-            (Vector3)ltw.Right * offset.x + Vector3.up * Mathf.Max(offset.y, startoffset.y) +
-            (Vector3)ltw.Forward * offset.z;
+                (Vector3)ltw.Right * offset.x +
+                Vector3.up * Mathf.Max(offset.y, startOffset.y) +
+                (Vector3)ltw.Forward * offset.z;
+
             transform.position = targetPos;
 
-            pitch += -lookVector.y * sensitivity * Time.deltaTime;
-            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+            // Camera Rotation Calculation
+            pitch = Mathf.Clamp(pitch - (lookVector.y * sensitivity * Time.deltaTime), minPitch, maxPitch);
             yaw += lookVector.x * sensitivity * Time.deltaTime;
 
-            // This aligns the base transform to the camera's yaw
             transform.rotation = Quaternion.Euler(0f, yaw, 0f);
-            Camera.main.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+            mainCamTransform.rotation = Quaternion.Euler(pitch, yaw, 0f);
 
-            PlayerData m = em.GetComponentData<PlayerData>(entity);
-            if (m.jumped == true)
+            // Animation Logic
+            if (m.jumped)
             {
-                StartCoroutine(nameof(playerJumped));
+                StartCoroutine(PlayerJumpedRoutine());
                 m.jumped = false;
+                em.SetComponentData(entity, m); // 3. ONLY set PlayerData if it actually changed
             }
 
-            Vector2 move = moveAction.action.ReadValue<Vector2>();
-            moveState = GetMoveState(move);
+            animator.SetBool(groundedHash, m.grounded);
 
-            if (hips != null && move.sqrMagnitude > 0.01f)
+            // Hip Logic
+            if (hips != null && moveSqrMag > 0.01f)
             {
                 Vector3 moveDirection = transform.right * move.x + transform.forward * move.y;
-
                 if (moveDirection != Vector3.zero)
                 {
-                    // Determine target rotation and smoothly interpolate toward it
                     Quaternion targetRotation = Quaternion.LookRotation(moveDirection.normalized, Vector3.up);
                     hips.rotation = Quaternion.Slerp(hips.rotation, targetRotation, hipTurnSpeed * Time.deltaTime);
                 }
             }
 
-            // CRITICAL ARCHITECTURE CLEANUP: Passing Yaw directly down so your PlayerMovementSystem can rotate the physics object
-            var input = new PlayerInputData
+            moveState = GetMoveState(move, moveSqrMag);
+
+            // Set Input Data
+            em.SetComponentData(entity, new PlayerInputData
             {
                 MoveAction = move,
                 Yaw = yaw,
-                JumpAction = jumpAction.action.ReadValue<float>() == 1,
+                JumpAction = isJumping,
                 sensitivity = sensitivity,
                 minPitch = minPitch,
                 maxPitch = maxPitch
-            };
+            });
 
-            em.SetComponentData(entity, input);
-            em.SetComponentData(entity, m);
-
-            velocity = em.GetComponentData<PhysicsVelocity>(entity).Linear;
-            float velContribution = new Vector2(velocity.x, velocity.z).sqrMagnitude / 16f; // Swapped velocity.y to velocity.z for standard horizontal FOV calculation
-            float targetFov = fov + velContribution / 2;
-            targetFov = Mathf.Clamp(targetFov, 75, 130);
-            mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, targetFov, 10 * Time.deltaTime);
+            // 4. AVOID VECTOR ALLOCATION: Calculate magnitude using raw floats
+            float flatVelocitySqr = (velocity.x * velocity.x) + (velocity.z * velocity.z);
+            float targetFov = Mathf.Clamp(fov + (flatVelocitySqr / 32f), 75f, 130f);
+            mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, targetFov, 10f * Time.deltaTime);
         }
 
-        private MoveState GetMoveState(Vector2 move, float deadzone = 0.1f)
+        private MoveState GetMoveState(Vector2 move, float sqrMag, float deadzone = 0.1f)
         {
-            if (move.sqrMagnitude <= deadzone * deadzone) return MoveState.idle;
+            if (sqrMag <= deadzone * deadzone) return MoveState.idle;
 
             float ax = Mathf.Abs(move.x);
             float ay = Mathf.Abs(move.y);
 
-            if (ax > ay)
-            {
-                return move.x > 0f ? MoveState.right : MoveState.left;
-            }
-            else
-            {
-                return move.y > 0f ? MoveState.fowards : MoveState.backwards;
-            }
+            if (ax > ay) return move.x > 0f ? MoveState.right : MoveState.left;
+            return move.y > 0f ? MoveState.forwards : MoveState.backwards;
         }
 
-        IEnumerator playerJumped()
+        private IEnumerator PlayerJumpedRoutine()
         {
-            animator.SetTrigger("Jumped");
-            bool changeFov = true;
-            if (moveState == MoveState.idle) changeFov = false;
+            animator.SetTrigger(jumpedHash);
+            bool changeFov = moveState != MoveState.idle;
 
-            float i = 0;
-            for (; i < .1f; i += Time.deltaTime)
+            for (float i = 0; i < 0.1f; i += Time.deltaTime)
             {
-                offset = new Vector3(offset.x, offset.y + (Time.deltaTime * 5f), offset.z);
+                offset.y += Time.deltaTime * 5f;
                 if (changeFov) mainCam.fieldOfView += Time.deltaTime * 20f;
                 yield return null;
             }
-            i = 0;
-            for (; i < 1; i += Time.deltaTime)
+
+            for (float i = 0; i < 1f; i += Time.deltaTime)
             {
-                offset = new Vector3(offset.x, offset.y - (Time.deltaTime * .5f), offset.z);
+                offset.y -= Time.deltaTime * 0.5f;
                 if (changeFov) mainCam.fieldOfView -= Time.deltaTime * 2f;
                 yield return null;
             }
-            offset = startoffset;
+
+            offset = startOffset;
         }
     }
 }

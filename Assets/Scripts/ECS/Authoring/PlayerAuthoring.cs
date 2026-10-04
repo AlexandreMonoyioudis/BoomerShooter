@@ -1,7 +1,5 @@
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Physics;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace ECS
@@ -25,7 +23,6 @@ namespace ECS
 
                 AddComponent(entity, new AllyPos());
                 AddComponent(entity, new PlayerInputData());
-
                 AddComponent(entity, new PlayerData
                 {
                     bulletMark = GetEntity(authoring.bulletMarkPrefab, TransformUsageFlags.Dynamic),
@@ -35,6 +32,10 @@ namespace ECS
                     jumpHeight = authoring.jumpHeight,
                     jumpCooldown = 0f,
                     jumped = false,
+                });
+                AddComponent(entity, new PhysicsGravityFactor
+                {
+                    Value = authoring.gravityFactor,
                 });
             }
         }

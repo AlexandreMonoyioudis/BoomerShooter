@@ -113,7 +113,7 @@ Rigidbody:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_ImplicitCom: 1
+  m_ImplicitCom: 0
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -155,7 +155,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d8e32b37d8002c4980195ca2d604611, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ECS.PlayerAuthoring
-  player: {fileID: 2656661009614553956}
   bulletMarkPrefab: {fileID: 5091476569424244728, guid: 52ae0b56cb8c0a149aae8e3b24a2aed5, type: 3}
   bulletVFXPrefab: {fileID: 3216402924751700360, guid: f34da9b5dd88d4d4e8f45f3bef5084ae, type: 3}
   speed: 20

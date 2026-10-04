@@ -10,6 +10,7 @@ public struct PlayerData : IComponentData
     public float jumpHeight;
     public float jumpCooldown;
     public bool jumped;
+    public bool grounded;
 }
 
 public struct PlayerInputData : IComponentData
