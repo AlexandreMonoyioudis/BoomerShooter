@@ -1,12 +1,12 @@
 # BoomerShooter
 
-A fast-paced retro-style first-person shooter built in **Unity** using the **Data-Oriented Technology Stack (DOTS)**. Currently in early development. Currently the player can move shoot and jump.
+A fast-paced retro-style first-person shooter built in **Unity** using the **Data-Oriented Technology Stack (DOTS)**. Currently in early development. Currently the player can move shoot and jump. Name will change once the game is more fleshed out.
 
 ---
 
 ## 📌 Project Overview
 
-**BoomerShooter** leverages Unity's high-performance DOTS framework (Entities, Burst Compiler, and Job System) to handle large numbers of entities, fast-moving projectiles, custom physics/command buffers, and complex AI behaviors efficiently.
+**BoomerShooter** leverages Unity's high-performance DOTS framework (Entities, Burst Compiler, and Job System) to handle large numbers of entities, fast-moving projectiles, custom physics/command buffers, and complex AI behaviors efficiently. 
 
 ---
 
