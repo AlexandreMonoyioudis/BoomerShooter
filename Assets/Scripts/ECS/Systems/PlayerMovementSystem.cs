@@ -51,16 +51,13 @@ namespace ECS
                 in PhysicsMass mass,
                 ref AllyPos pos)
             {
-                // 1. Calculate Rotation & Direction Vectors via math.mul
                 quaternion targetRot = quaternion.Euler(0f, math.radians(input.Yaw), 0f);
                 transform.Rotation = targetRot;
 
-                // Multiply rotation by unit direction vectors for Forward and Right
                 float3 forward = math.mul(targetRot, new float3(0f, 0f, 1f));
                 float3 right = math.mul(targetRot, new float3(1f, 0f, 0f));
                 float3 moveDir = forward * input.MoveAction.y + right * input.MoveAction.x;
 
-                // 2. Ground Raycast Check
                 bool grounded = false;
 
                 if (physCollider.IsValid)
@@ -125,8 +122,7 @@ namespace ECS
                         v.Linear.y += v.Linear.y * 2.5f * DeltaTime;
                     }
 
-                        // Apply air resistance strictly on horizontal XZ plane
-                        float linearDrag = 1.0f;
+                    float linearDrag = 1.0f;
                     float scale = math.max(1f - linearDrag * DeltaTime, 0f);
                     v.Linear.x *= scale;
                     v.Linear.z *= scale;

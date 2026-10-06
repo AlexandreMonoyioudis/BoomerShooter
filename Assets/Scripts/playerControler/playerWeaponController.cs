@@ -10,6 +10,8 @@ using UnityEngine.VFX;
 
 public class PlayerWeaponController : MonoBehaviour
 {
+    private static readonly int ShootingHash = Animator.StringToHash("shooting");
+
     [Header("Input")]
     [SerializeField] private InputActionReference gunAction;
     [SerializeField] private InputActionReference cannonAction;
@@ -90,7 +92,8 @@ public class PlayerWeaponController : MonoBehaviour
 
     private void OnGunStarted(InputAction.CallbackContext ctx)
     {
-        animator.SetBool("shooting", true);
+        // Using cached hash instead of string lookup
+        animator.SetBool(ShootingHash, true);
         armTargetWeight = 1f;
 
         fireCoroutineA = StartCoroutine(TryFireCoroutine(effects[0], 0f, 0.2f));
@@ -99,7 +102,8 @@ public class PlayerWeaponController : MonoBehaviour
 
     private void OnGunCanceled(InputAction.CallbackContext ctx)
     {
-        animator.SetBool("shooting", false);
+        // Using cached hash instead of string lookup
+        animator.SetBool(ShootingHash, false);
         armTargetWeight = 0f;
 
         if (fireCoroutineA != null)
@@ -128,7 +132,6 @@ public class PlayerWeaponController : MonoBehaviour
             cannonTranform[1].localRotation = Quaternion.Euler(90f, 0f, 0f);
             cannonTranform[2].localRotation = Quaternion.Euler(50f, 0f, 0f);
         }
-
     }
 
     private void OnCannonCanceled(InputAction.CallbackContext ctx)
