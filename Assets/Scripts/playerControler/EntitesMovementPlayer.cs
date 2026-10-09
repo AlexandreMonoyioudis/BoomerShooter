@@ -78,11 +78,6 @@ namespace ECS
             moveAction.action.Disable();
             jumpAction.action.Disable();
             lookAction.action.Disable();
-
-            if (inputQuery != default)
-            {
-                inputQuery.Dispose();
-            }
         }
 
         private IEnumerator FindPlayer()
