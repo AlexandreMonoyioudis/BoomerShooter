@@ -21,7 +21,10 @@ namespace ECS
         [SerializeField] private float sensitivity = 50f;
         [SerializeField] private float minPitch = -45f;
         [SerializeField] private float maxPitch = 45f;
+
+        [Header("Turning animation")]
         [SerializeField] private float hipTurnSpeed = 10f;
+        [SerializeField] private float tiltSpeed = 10f;
 
         private Transform mainCamTransform;
         private Vector3 offset;
@@ -32,6 +35,8 @@ namespace ECS
         private float fov;
         private float pitch;
         private float yaw;
+        private float currentTiltX;
+        private float currentTiltZ;
         private MoveState moveState;
         private Coroutine jumpCoroutine;
         private enum MoveState { idle, forwards, left, right, backwards }
@@ -140,7 +145,14 @@ namespace ECS
             pitch = Mathf.Clamp(pitch - (lookVector.y * sensitivity * Time.deltaTime), minPitch, maxPitch);
             yaw += lookVector.x * sensitivity * Time.deltaTime;
 
-            transform.rotation = Quaternion.Euler(move.y * moveSqrMag * 6f, yaw, -move.x * moveSqrMag * 6f);
+            // Lerp the X and Z tilts
+            float targetTiltX = move.y * moveSqrMag * 6f;
+            float targetTiltZ = -move.x * moveSqrMag * 6f;
+
+            currentTiltX = Mathf.Lerp(currentTiltX, targetTiltX, tiltSpeed * Time.deltaTime);
+            currentTiltZ = Mathf.Lerp(currentTiltZ, targetTiltZ, tiltSpeed * Time.deltaTime);
+
+            transform.rotation = Quaternion.Euler(currentTiltX, yaw, currentTiltZ);
             mainCamTransform.rotation = Quaternion.Euler(pitch, yaw, 0f);
 
             // Animation & Jump Logic
