@@ -33,17 +33,17 @@ namespace ECS
         private float pitch;
         private float yaw;
         private MoveState moveState;
+        private Coroutine jumpCoroutine;
         private enum MoveState { idle, forwards, left, right, backwards }
 
-        // Cache animator hashes to avoid string allocations every frame
         private readonly int groundedHash = Animator.StringToHash("isGrounded");
         private readonly int jumpedHash = Animator.StringToHash("Jumped");
 
         private void Start()
         {
-            moveAction?.action.Enable();
-            jumpAction?.action.Enable();
-            lookAction?.action.Enable();
+            moveAction.action.Enable();
+            jumpAction.action.Enable();
+            lookAction.action.Enable();
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
@@ -52,27 +52,32 @@ namespace ECS
             fov = mainCam.fieldOfView;
             offset = startOffset;
 
-            // Corrected: X is usually pitch, Y is yaw in Euler angles
             pitch = transform.localEulerAngles.x;
             yaw = transform.localEulerAngles.y;
             if (pitch > 180f) pitch -= 360f;
 
             em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-            // 1. CACHE THE QUERY ONCE
-            inputQuery = new EntityQueryBuilder(Allocator.Temp)
-                .WithAllRW<PlayerInputData, PlayerData>()
-                .WithAll<PhysicsVelocity, LocalToWorld>()
-                .Build(em);
+            inputQuery = em.CreateEntityQuery(
+                ComponentType.ReadWrite<PlayerInputData>(),
+                ComponentType.ReadWrite<PlayerData>(),
+                ComponentType.ReadOnly<PhysicsVelocity>(),
+                ComponentType.ReadOnly<LocalToWorld>()
+            );
 
             StartCoroutine(FindPlayer());
         }
 
         private void OnDestroy()
         {
-            moveAction?.action.Disable();
-            jumpAction?.action.Disable();
-            lookAction?.action.Disable();
+            moveAction.action.Disable();
+            jumpAction.action.Disable();
+            lookAction.action.Disable();
+
+            if (inputQuery != default)
+            {
+                inputQuery.Dispose();
+            }
         }
 
         private IEnumerator FindPlayer()
@@ -81,8 +86,7 @@ namespace ECS
             {
                 if (!inputQuery.IsEmptyIgnoreFilter)
                 {
-                    // 2. REMOVED TRY-CATCH, use NativeArray safely
-                    using var arr = inputQuery.ToEntityArray(Allocator.Temp);
+                    using NativeArray<Entity> arr = inputQuery.ToEntityArray(Allocator.Temp);
                     if (arr.Length > 0)
                     {
                         entity = arr[0];
@@ -136,21 +140,23 @@ namespace ECS
             pitch = Mathf.Clamp(pitch - (lookVector.y * sensitivity * Time.deltaTime), minPitch, maxPitch);
             yaw += lookVector.x * sensitivity * Time.deltaTime;
 
-            transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+            transform.rotation = Quaternion.Euler(move.y * moveSqrMag * 6f, yaw, -move.x * moveSqrMag * 6f);
             mainCamTransform.rotation = Quaternion.Euler(pitch, yaw, 0f);
 
-            // Animation Logic
+            // Animation & Jump Logic
             if (m.jumped)
             {
-                StartCoroutine(PlayerJumpedRoutine());
+                if (jumpCoroutine != null) StopCoroutine(jumpCoroutine);
+                jumpCoroutine = StartCoroutine(PlayerJumpedRoutine());
+
                 m.jumped = false;
-                em.SetComponentData(entity, m); // 3. ONLY set PlayerData if it actually changed
+                em.SetComponentData(entity, m);
             }
 
             animator.SetBool(groundedHash, m.grounded);
 
             // Hip Logic
-            if (hips != null && moveSqrMag > 0.01f)
+            if (moveSqrMag > 0.01f)
             {
                 Vector3 moveDirection = transform.right * move.x + transform.forward * move.y;
                 if (moveDirection != Vector3.zero)
@@ -173,7 +179,7 @@ namespace ECS
                 maxPitch = maxPitch
             });
 
-            // 4. AVOID VECTOR ALLOCATION: Calculate magnitude using raw floats
+            // FOV Calculation
             float flatVelocitySqr = (velocity.x * velocity.x) + (velocity.z * velocity.z);
             float targetFov = Mathf.Clamp(fov + (flatVelocitySqr / 32f), 75f, 130f);
             mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, targetFov, 10f * Time.deltaTime);
@@ -210,6 +216,7 @@ namespace ECS
             }
 
             offset = startOffset;
+            jumpCoroutine = null;
         }
     }
 }
