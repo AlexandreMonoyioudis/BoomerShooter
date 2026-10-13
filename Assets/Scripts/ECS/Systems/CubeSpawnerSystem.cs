@@ -2,12 +2,10 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Transforms;
 
 namespace ECS
 {
-
 
     [BurstCompile]
     public partial struct CubeSpawnerSystem : ISystem
@@ -26,7 +24,6 @@ namespace ECS
             {
                 Entity newEntity = ecb.Instantiate(spawner.ValueRO.Prefab);
 
-
                 ecb.SetName(newEntity, new FixedString64Bytes("Enemy"));
 
                 float3 spawnPos = spawner.ValueRO.SpawnPos;
@@ -37,28 +34,13 @@ namespace ECS
                     Scale = 1f
                 });
 
-                ecb.AddComponent(newEntity, new PhysicsVelocity
-                {
-                    Linear = float3.zero,
-                    Angular = float3.zero
-                });
-
-                ecb.AddComponent(newEntity, new PhysicsDamping
-                {
-                    Linear = 0.01f,
-                    Angular = 0.01f
-                });
-
-                ecb.AddComponent(newEntity, new PhysicsGravityFactor { Value = 1f });
-
                 ecb.AddComponent(newEntity, new EnemyComponent
                 {
                     moveDirection = new Random(0xABCDEFu).NextFloat3(),
+                    targetPos = spawnPos,
                     moveSpeed = 5f,
                     hp = 3
                 });
-
-                ecb.AddComponent(newEntity, new EnemyTag());
 
                 spawner.ValueRW.NextSpawnTime = (float)SystemAPI.Time.ElapsedTime + 2f;
                 ecb.Playback(state.EntityManager);

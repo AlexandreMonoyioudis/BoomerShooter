@@ -12,20 +12,15 @@ namespace ECS
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<PlayerInputData>();
             state.RequireForUpdate<EnemyComponent>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            Entity playerEntity = SystemAPI.GetSingletonEntity<PlayerInputData>();
-            float3 playerPos = SystemAPI.GetComponent<LocalTransform>(playerEntity).Position;
-
-            var job = new EnemyMoveJob
+            EnemyMoveJob job = new EnemyMoveJob
             {
                 DeltaTime = SystemAPI.Time.DeltaTime,
-                playerPos = playerPos,
             };
 
             state.Dependency = job.ScheduleParallel(state.Dependency);
@@ -36,14 +31,16 @@ namespace ECS
     public partial struct EnemyMoveJob : IJobEntity
     {
         public float DeltaTime;
-        public float3 playerPos;
 
         void Execute(in LocalTransform transform,
                      ref PhysicsVelocity physicsVelocity,
                      in EnemyComponent enemyComponent)
         {
-            float3 toPlayer = playerPos - transform.Position;
-            float distSq = math.lengthsq(toPlayer);
+            if (enemyComponent.hp <= 0)
+                return;
+
+            float3 toTarget = enemyComponent.targetPos - transform.Position;
+            float distSq = math.lengthsq(toTarget);
 
             if (distSq <= 0.0001f)
             {
@@ -53,7 +50,7 @@ namespace ECS
             }
 
             float dist = math.sqrt(distSq);
-            float3 dir = toPlayer / dist;
+            float3 dir = toTarget / dist;
 
             float maxSpeed = enemyComponent.moveSpeed;
             float accel = 10f;
@@ -75,15 +72,10 @@ namespace ECS
 
             physicsVelocity.Linear = newVel;
 
-            // --- Yaw Rotation ---
             float3 forward = transform.Forward();
-            float currentYaw = math.atan2(forward.x, forward.z);
-            float desiredYaw = math.atan2(dir.x, dir.z);
-
-            float rawDelta = desiredYaw - currentYaw;
-            // Clean modulo angle wrapping without redundant sin/cos calls
-            float deltaYaw = (rawDelta + math.PI) % (2f * math.PI) - math.PI;
-            if (deltaYaw < -math.PI) deltaYaw += 2f * math.PI;
+            float dot = (forward.x * dir.x) + (forward.z * dir.z);
+            float cross = (forward.z * dir.x) - (forward.x * dir.z);
+            float deltaYaw = math.atan2(cross, dot);
 
             float maxAngular = 4f; // rad/s
             float desiredAngularSpeed = deltaYaw / math.max(DeltaTime, 0.0001f);

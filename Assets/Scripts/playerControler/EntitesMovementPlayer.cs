@@ -62,7 +62,6 @@ namespace ECS
             if (pitch > 180f) pitch -= 360f;
 
             em = World.DefaultGameObjectInjectionWorld.EntityManager;
-
             inputQuery = em.CreateEntityQuery(
                 ComponentType.ReadWrite<PlayerInputData>(),
                 ComponentType.ReadWrite<PlayerData>(),
