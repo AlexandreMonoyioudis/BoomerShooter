@@ -10,7 +10,7 @@ namespace ECS
         Collapse
     }
 
-    public struct MarkedForDeath : IComponentData
+    public struct MarkedForDeath : IComponentData, IEnableableComponent
     {
         public DeathType Value;
     }

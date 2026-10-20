@@ -7,18 +7,13 @@ using Unity.Transforms;
 namespace ECS
 {
     [BurstCompile]
-    public partial struct EnemySystem : ISystem
+    public partial struct EnemyMovementSystem : ISystem
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
-        {
-            state.RequireForUpdate<EnemyComponent>();
-        }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EnemyMoveJob job = new EnemyMoveJob
+            EnemyMovementJob job = new EnemyMovementJob
             {
                 DeltaTime = SystemAPI.Time.DeltaTime,
             };
@@ -28,18 +23,19 @@ namespace ECS
     }
 
     [BurstCompile]
-    public partial struct EnemyMoveJob : IJobEntity
+    public partial struct EnemyMovementJob : IJobEntity
     {
         public float DeltaTime;
 
         void Execute(in LocalTransform transform,
                      ref PhysicsVelocity physicsVelocity,
-                     in EnemyComponent enemyComponent)
+                     ref EnemyMovementControler enemyMovementControler,
+                     in EnemyMovement enemyComponent)
         {
             if (enemyComponent.hp <= 0)
                 return;
 
-            float3 toTarget = enemyComponent.targetPos - transform.Position;
+            float3 toTarget = enemyMovementControler.targetPos - transform.Position;
             float distSq = math.lengthsq(toTarget);
 
             if (distSq <= 0.0001f)
@@ -83,5 +79,15 @@ namespace ECS
 
             physicsVelocity.Angular = new float3(0f, appliedAngular, 0f);
         }
+    }
+
+    public struct EnemyMovement : IComponentData
+    {
+        public float moveSpeed;
+        public float hp;
+    }
+    public struct EnemyMovementControler : IComponentData
+    {
+        public float3 targetPos;
     }
 }

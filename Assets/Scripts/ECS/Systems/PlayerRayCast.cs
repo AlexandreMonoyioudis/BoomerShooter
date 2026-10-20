@@ -103,7 +103,7 @@ namespace ECS
                 var job = new RaycastJob
                 {
                     CollisionWorld = physicsWorld.CollisionWorld,
-                    EnemyLookup = SystemAPI.GetComponentLookup<EnemyComponent>(isReadOnly: true),
+                    EnemyLookup = SystemAPI.GetComponentLookup<EnemyMovement>(isReadOnly: true),
                     HitResults = hitResults.AsParallelWriter(),
                     ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter()
                 };
@@ -223,7 +223,7 @@ namespace ECS
         partial struct RaycastJob : IJobEntity
         {
             [ReadOnly] public CollisionWorld CollisionWorld;
-            [ReadOnly] public ComponentLookup<EnemyComponent> EnemyLookup;
+            [ReadOnly] public ComponentLookup<EnemyMovement> EnemyLookup;
 
             public NativeQueue<DecalHitInfo>.ParallelWriter HitResults;
             public EntityCommandBuffer.ParallelWriter ECB;
@@ -264,7 +264,7 @@ namespace ECS
 
                         if (EnemyLookup.HasComponent(hitEntity))
                         {
-                            EnemyComponent enemy = EnemyLookup[hitEntity];
+                            EnemyMovement enemy = EnemyLookup[hitEntity];
                             float newHp = enemy.hp - rp.damage;
 
                             enemy.hp = newHp;
@@ -272,10 +272,11 @@ namespace ECS
 
                             if (newHp <= 0f)
                             {
-                                ECB.AddComponent(sortKey, hitEntity, new MarkedForDeath
+                                ECB.SetComponent(sortKey, hitEntity, new MarkedForDeath
                                 {
                                     Value = DeathType.Unexist
                                 });
+                                ECB.SetComponentEnabled<MarkedForDeath>(sortKey,hitEntity, true);
                             }
                         }
                         else
