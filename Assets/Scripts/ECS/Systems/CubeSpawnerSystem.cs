@@ -24,10 +24,7 @@ namespace ECS
 
             // 1. Create the Smart Enemy (Commander) Entity
             Entity smartEnemyEntity = ecb.CreateEntity();
-            ecb.SetName(smartEnemyEntity, new FixedString64Bytes("SmartEnemy_Commander"));
             ecb.AddComponent<SmartEnemy>(smartEnemyEntity);
-
-            // Add a dynamic buffer to hold references to its squad entities
             ecb.AddBuffer<SquadReferenceElement>(smartEnemyEntity);
 
             float3 baseSpawnPos = spawner.ValueRO.SpawnPos;
@@ -38,7 +35,6 @@ namespace ECS
             {
                 // 2. Create a separate Entity for this Squad
                 Entity squadEntity = ecb.CreateEntity();
-                ecb.SetName(squadEntity, new FixedString64Bytes($"Squad_{s}"));
 
                 // Offset each squad's initial spawn point so they don't overlap
                 float3 squadSpawnPos = baseSpawnPos + new float3(s * 8f, 0f, 0f);
@@ -60,10 +56,9 @@ namespace ECS
                 for (int i = 0; i < enemiesPerSquad; i++)
                 {
                     Entity newEntity = ecb.Instantiate(spawner.ValueRO.Prefab);
-                    ecb.SetName(newEntity, new FixedString64Bytes($"Enemy_Squad_{s}_{i}"));
 
                     // Offset minions slightly within the squad's area
-                    float3 minionSpawnPos = squadSpawnPos + new float3(i * 25f, 0f, 2f);
+                    float3 minionSpawnPos = squadSpawnPos + new float3(i * 1.5f, 0f, 2f);
 
                     ecb.SetComponent(newEntity, new LocalTransform
                     {
@@ -74,7 +69,7 @@ namespace ECS
 
                     ecb.AddComponent(newEntity, new EnemyMovement
                     {
-                        moveSpeed = 10f,
+                        moveSpeed = 50f,
                         hp = 3
                     });
 

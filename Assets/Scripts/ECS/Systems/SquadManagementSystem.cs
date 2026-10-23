@@ -2,6 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+
 namespace ECS
 {
     partial struct SquadManagementSystem : ISystem
@@ -15,34 +16,48 @@ namespace ECS
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            EntityManager entityManager = state.EntityManager;
+
             // Iterate over all active squads in the game simultaneously
             foreach (var (squad, minionsBuffer) in SystemAPI.Query<RefRW<SquadComponent>, DynamicBuffer<MinionReference>>())
             {
-                // Dirty check: Only recalculate formation if this specific squad's target moved
-                if (!math.all(squad.ValueRO.targetPos == squad.ValueRO.lastTargetPos))
+                // 1. Clean up dead or dying minions from the buffer (iterate backwards to safely remove elements)
+                for (int i = minionsBuffer.Length - 1; i >= 0; i--)
                 {
-                    squad.ValueRW.lastTargetPos = squad.ValueRO.targetPos;
+                    Entity minionEntity = minionsBuffer[i].MinionEntity;
 
-                    int minionCount = minionsBuffer.Length;
-                    if (minionCount == 0) continue;
-
-                    // Generate formation positions for this squad's minions around its specific target
-                    NativeArray<float3> positionArray = GeneratePositionArray(squad.ValueRO.targetPos, minionCount);
-
-                    // Update each minion assigned to this squad
-                    for (int i = 0; i < minionCount; i++)
+                    // Check if the minion is marked for death (HasComponent safely returns false if the entity is already destroyed)
+                    if (entityManager.HasComponent<MarkedForDeath>(minionEntity) &&
+                        entityManager.IsComponentEnabled<MarkedForDeath>(minionEntity))
                     {
-                        Entity minionEntity = minionsBuffer[i].MinionEntity;
-                        if (SystemAPI.HasComponent<EnemyMovementControler>(minionEntity))
-                        {
-                            var minionMove = SystemAPI.GetComponent<EnemyMovementControler>(minionEntity);
-                            minionMove.targetPos = positionArray[i];
-                            SystemAPI.SetComponent(minionEntity, minionMove);
-                        }
+                        minionsBuffer.RemoveAt(i);
                     }
-
-                    positionArray.Dispose();
                 }
+
+                int minionCount = minionsBuffer.Length;
+                if (minionCount == 0) continue;
+
+                // 2. Check if target moved OR if casualties occurred requiring formation re-evaluation
+                bool targetMoved = !math.all(squad.ValueRO.targetPos == squad.ValueRO.lastTargetPos);
+                squad.ValueRW.lastTargetPos = squad.ValueRO.targetPos;
+
+                // Generate formation positions for this squad's surviving minions around its specific target
+                NativeArray<float3> positionArray = GeneratePositionArray(squad.ValueRO.targetPos, minionCount);
+
+                // Update each surviving minion assigned to this squad
+                for (int i = 0; i < minionCount; i++)
+                {
+                    Entity minionEntity = minionsBuffer[i].MinionEntity;
+                    if (entityManager.HasComponent<EnemyMovementControler>(minionEntity))
+                    {
+                        var minionMove = entityManager.GetComponentData<EnemyMovementControler>(minionEntity);
+                        minionMove.targetPos = positionArray[i];
+                        entityManager.SetComponentData(minionEntity, minionMove);
+                    }
+                }
+
+                positionArray.Dispose();
+
             }
         }
 
@@ -59,7 +74,7 @@ namespace ECS
             positionArray[0] = targetPosition;
             if (positionCount == 1) return positionArray;
 
-            float ringSize = 22f;
+            float ringSize = 20f;
             int ring = 0;
             int positionIndex = 1;
 
@@ -81,6 +96,7 @@ namespace ECS
             return positionArray;
         }
     }
+
     // 1. Root Smart Enemy component
     public struct SmartEnemy : IComponentData { }
 

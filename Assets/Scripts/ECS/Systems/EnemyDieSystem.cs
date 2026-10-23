@@ -15,6 +15,7 @@ namespace ECS
         public DeathType Value;
     }
 
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
     [BurstCompile]
     public partial struct EnemyDieSystem : ISystem
     {
@@ -48,7 +49,6 @@ namespace ECS
                 switch (markedForDeath.Value)
                 {
                     case DeathType.Unexist:
-                        ECB.DestroyEntity(sortKey, entity);
                         break;
 
                     case DeathType.Explode:
