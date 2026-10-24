@@ -61,11 +61,6 @@ namespace ECS
             }
         }
 
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-        }
-
         private static NativeArray<float3> GeneratePositionArray(float3 targetPosition, int positionCount)
         {
             NativeArray<float3> positionArray = new NativeArray<float3>(positionCount, Allocator.Temp);

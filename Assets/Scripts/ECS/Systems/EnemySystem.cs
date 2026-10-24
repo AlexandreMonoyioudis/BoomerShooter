@@ -9,7 +9,6 @@ namespace ECS
     [BurstCompile]
     public partial struct EnemyMovementSystem : ISystem
     {
-
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -29,9 +28,13 @@ namespace ECS
 
         void Execute(in LocalTransform transform,
                      ref PhysicsVelocity physicsVelocity,
+                     ref PhysicsMass physicsMass,
                      ref EnemyMovementControler enemyMovementControler,
                      in EnemyMovement enemyComponent)
         {
+            physicsMass.InverseInertia.x = 0f;
+            physicsMass.InverseInertia.z = 0f;
+
             if (enemyComponent.hp <= 0)
                 return;
 
@@ -86,6 +89,7 @@ namespace ECS
         public float moveSpeed;
         public float hp;
     }
+
     public struct EnemyMovementControler : IComponentData
     {
         public float3 targetPos;

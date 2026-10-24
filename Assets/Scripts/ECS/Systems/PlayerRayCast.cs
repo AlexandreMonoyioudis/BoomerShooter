@@ -3,12 +3,11 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Physics.Systems;
 using Unity.Transforms;
 
 namespace ECS
 {
-    // --- DATA COMPONENTS & BUFFERS ---
-
     public struct RayParam : IBufferElementData
     {
         public float3 Origin;
@@ -40,6 +39,7 @@ namespace ECS
     // --- SYSTEM 1: RAYCAST & POOL MANAGER ---
 
     [BurstCompile]
+    [UpdateInGroup(typeof(VariableRateSimulationSystemGroup))]
     public partial struct PlayerRayCast : ISystem
     {
         private const int MAX_BULLET_MARKS = 64;

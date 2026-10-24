@@ -9,8 +9,9 @@ using Unity.Transforms;
 
 namespace ECS
 {
-    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [BurstCompile]
     [UpdateBefore(typeof(PhysicsSystemGroup))]
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     public partial struct PlayerMovementSystem : ISystem
     {
         [BurstCompile]
@@ -40,7 +41,6 @@ namespace ECS
             public float DeltaTime;
 
             [ReadOnly] public CollisionWorld CollisionWorld;
-
             void Execute(
                 Entity entity,
                 ref LocalTransform transform,
@@ -48,8 +48,7 @@ namespace ECS
                 in PlayerInputData input,
                 ref PlayerData m,
                 in PhysicsCollider physCollider,
-                in PhysicsMass mass,
-                ref AllyPos pos)
+                in PhysicsMass mass)
             {
                 quaternion targetRot = quaternion.Euler(0f, math.radians(input.Yaw), 0f);
                 transform.Rotation = targetRot;
@@ -135,7 +134,6 @@ namespace ECS
                 }
 
                 v.Angular = float3.zero;
-                pos.Value = transform.Position;
             }
         }
     }
