@@ -28,13 +28,7 @@ namespace ECS
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
-
-            var job = new EnemyDieJob
-            {
-                ECB = ecb
-            };
+            var job = new EnemyDieJob{};
 
             state.Dependency = job.ScheduleParallel(state.Dependency);
         }
@@ -42,7 +36,6 @@ namespace ECS
         [BurstCompile]
         partial struct EnemyDieJob : IJobEntity
         {
-            public EntityCommandBuffer.ParallelWriter ECB;
 
             void Execute([EntityIndexInQuery] int sortKey, Entity entity, in MarkedForDeath markedForDeath)
             {
