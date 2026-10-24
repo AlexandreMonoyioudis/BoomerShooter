@@ -21,7 +21,6 @@ namespace ECS
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 
-                AddComponent(entity, new AllyPos());
                 AddComponent(entity, new PlayerInputData());
                 AddComponent(entity, new PlayerData
                 {
