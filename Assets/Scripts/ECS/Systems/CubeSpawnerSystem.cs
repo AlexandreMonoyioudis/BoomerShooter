@@ -43,7 +43,6 @@ namespace ECS
                 {
                     groupIndex = s,
                     targetPos = squadSpawnPos,
-                    lastTargetPos = float3.zero // Forces initial formation calculation
                 });
 
                 // Add a dynamic buffer to track this squad's minions

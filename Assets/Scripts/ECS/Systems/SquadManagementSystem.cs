@@ -18,15 +18,12 @@ namespace ECS
         {
             EntityManager entityManager = state.EntityManager;
 
-            // Iterate over all active squads in the game simultaneously
-            foreach (var (squad, minionsBuffer) in SystemAPI.Query<RefRW<SquadComponent>, DynamicBuffer<MinionReference>>())
+            foreach (var (squad, minionsBuffer) in SystemAPI.Query<RefRO<SquadComponent>, DynamicBuffer<MinionReference>>())
             {
-                // 1. Clean up dead or dying minions from the buffer (iterate backwards to safely remove elements)
                 for (int i = minionsBuffer.Length - 1; i >= 0; i--)
                 {
                     Entity minionEntity = minionsBuffer[i].MinionEntity;
 
-                    // Check if the minion is marked for death (HasComponent safely returns false if the entity is already destroyed)
                     if (entityManager.HasComponent<MarkedForDeath>(minionEntity) &&
                         entityManager.IsComponentEnabled<MarkedForDeath>(minionEntity))
                     {
@@ -37,14 +34,8 @@ namespace ECS
                 int minionCount = minionsBuffer.Length;
                 if (minionCount == 0) continue;
 
-                // 2. Check if target moved OR if casualties occurred requiring formation re-evaluation
-                bool targetMoved = !math.all(squad.ValueRO.targetPos == squad.ValueRO.lastTargetPos);
-                squad.ValueRW.lastTargetPos = squad.ValueRO.targetPos;
-
-                // Generate formation positions for this squad's surviving minions around its specific target
                 NativeArray<float3> positionArray = GeneratePositionArray(squad.ValueRO.targetPos, minionCount);
 
-                // Update each surviving minion assigned to this squad
                 for (int i = 0; i < minionCount; i++)
                 {
                     Entity minionEntity = minionsBuffer[i].MinionEntity;
@@ -92,24 +83,20 @@ namespace ECS
         }
     }
 
-    // 1. Root Smart Enemy component
     public struct SmartEnemy : IComponentData { }
 
-    // 2. Attached to Smart Enemy: References its squad entities
     public struct SquadReferenceElement : IBufferElementData
     {
         public Entity SquadEntity;
     }
 
-    // 3. Attached to a Squad Entity: Manages its own group target and minions
     public struct SquadComponent : IComponentData
     {
         public int groupIndex;
         public float3 targetPos;
-        public float3 lastTargetPos; // Used for dirty-checking
+        public float3 targetEnemy;
     }
 
-    // 4. Attached to Squad Entity: Dynamic buffer tracking its specific minions
     public struct MinionReference : IBufferElementData
     {
         public Entity MinionEntity;

@@ -20,7 +20,7 @@ namespace ECS
             public override void Bake(PlayerAuthoring authoring)
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
-
+                AddComponent(entity, new Ally());
                 AddComponent(entity, new PlayerInputData());
                 AddComponent(entity, new PlayerData
                 {
@@ -39,4 +39,5 @@ namespace ECS
             }
         }
     }
+    public struct Ally : IComponentData{}
 }
