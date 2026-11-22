@@ -28,8 +28,8 @@ namespace ECS
             ecb.AddBuffer<SquadReferenceElement>(smartEnemyEntity);
 
             float3 baseSpawnPos = spawner.ValueRO.SpawnPos;
-            int squadCount = 2;
-            int enemiesPerSquad = 10; // Spawns 20 total enemies split across 2 squads
+            int squadCount = 1;
+            int enemiesPerSquad = 3;
 
             for (int s = 0; s < squadCount; s++)
             {
@@ -37,12 +37,17 @@ namespace ECS
                 Entity squadEntity = ecb.CreateEntity();
 
                 // Offset each squad's initial spawn point so they don't overlap
-                float3 squadSpawnPos = baseSpawnPos + new float3(s * 8f, 0f, 0f);
+                float3 squadSpawnPos = baseSpawnPos + new float3(s * 100f, 0f, 0f);
 
                 ecb.AddComponent(squadEntity, new SquadComponent
                 {
                     groupIndex = s,
+                });
+                ecb.AddComponent(squadEntity, new SquadMovementComponent
+                {
                     targetPos = squadSpawnPos,
+                    formation = SquadFormationType.Circle,
+                    minionSpacing = 0f,
                 });
 
                 // Add a dynamic buffer to track this squad's minions

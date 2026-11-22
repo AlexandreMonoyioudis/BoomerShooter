@@ -49,18 +49,18 @@ namespace ECS
         [ReadOnly] public NativeArray<LocalTransform> AllyTransforms;
 
         [BurstCompile]
-        public void Execute(ref SquadComponent squadComponent)
+        public void Execute(in SquadMovementComponent squadMovementComponent, ref SquadComponent squadComponent)
         {
             if (AllyTransforms.Length == 0) return;
 
             float minDistanceSq = float.MaxValue;
-            float3 closestPosition = squadComponent.targetPos;
+            float3 closestPosition = squadMovementComponent.targetPos;
 
             for (int i = 0; i < AllyTransforms.Length; i++)
             {
                 float3 allyPos = AllyTransforms[i].Position;
 
-                float distSq = math.distancesq(squadComponent.targetPos, allyPos);
+                float distSq = math.distancesq(squadMovementComponent.targetPos, allyPos);
 
                 if (distSq < minDistanceSq)
                 {

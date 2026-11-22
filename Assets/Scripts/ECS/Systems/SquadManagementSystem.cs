@@ -5,12 +5,19 @@ using Unity.Mathematics;
 
 namespace ECS
 {
+    public enum SquadFormationType : byte
+    {
+        Circle,
+        Blob,
+        Line
+    }
     partial struct SquadManagementSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<SquadComponent>();
+            state.RequireForUpdate<SquadMovementComponent>();
         }
 
         [BurstCompile]
@@ -18,7 +25,7 @@ namespace ECS
         {
             EntityManager entityManager = state.EntityManager;
 
-            foreach (var (squad, minionsBuffer) in SystemAPI.Query<RefRO<SquadComponent>, DynamicBuffer<MinionReference>>())
+            foreach (var (squad, target, minionsBuffer) in SystemAPI.Query<RefRO<SquadComponent>, RefRO<SquadMovementComponent>, DynamicBuffer<MinionReference>>())
             {
                 for (int i = minionsBuffer.Length - 1; i >= 0; i--)
                 {
@@ -34,7 +41,7 @@ namespace ECS
                 int minionCount = minionsBuffer.Length;
                 if (minionCount == 0) continue;
 
-                NativeArray<float3> positionArray = GeneratePositionArray(squad.ValueRO.targetPos, minionCount);
+                NativeArray<float3> positionArray = GeneratePositionArray(target.ValueRO.targetPos, minionCount);
 
                 for (int i = 0; i < minionCount; i++)
                 {
@@ -83,21 +90,22 @@ namespace ECS
         }
     }
 
-    public struct SmartEnemy : IComponentData { }
 
-    public struct SquadReferenceElement : IBufferElementData
-    {
-        public Entity SquadEntity;
-    }
 
     public struct SquadComponent : IComponentData
     {
         public int groupIndex;
-        public float3 targetPos;
         public float3 targetEnemy;
     }
 
-    public struct MinionReference : IBufferElementData
+    public struct SquadMovementComponent : IComponentData
+    {
+        public float3 targetPos;
+        public float3 minionSpacing;
+        public SquadFormationType formation;
+    }
+
+        public struct MinionReference : IBufferElementData
     {
         public Entity MinionEntity;
     }
